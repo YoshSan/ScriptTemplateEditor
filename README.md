@@ -1,0 +1,2 @@
+# ScriptTemplateEditor
+ScriptTemplateを追加するEditor拡張

@@ -3,5 +3,6 @@
 /ScriptTemplateEditor/Library/
 /ScriptTemplateEditor/ProjectSettings/
 /ScriptTemplateEditor/UnityPackageManager/
+/ScriptTemplateEditor/Temp/
 *.csproj
 *.sln

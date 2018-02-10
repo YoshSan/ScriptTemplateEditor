@@ -1,0 +1,7 @@
+/ScriptTemplateEditor/.vs/
+/ScriptTemplateEditor/etc/
+/ScriptTemplateEditor/Library/
+/ScriptTemplateEditor/ProjectSettings/
+/ScriptTemplateEditor/UnityPackageManager/
+*.csproj
+*.sln

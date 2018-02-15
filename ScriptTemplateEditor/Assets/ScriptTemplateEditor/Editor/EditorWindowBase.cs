@@ -18,7 +18,6 @@ namespace Yosh.Editor
 		{
 			EditorApplication.update -= OnUpdate;
 			_iEnumerator.Clear();
-			_iEnumerator = null;
 		}
 
 		private static void OnUpdate()

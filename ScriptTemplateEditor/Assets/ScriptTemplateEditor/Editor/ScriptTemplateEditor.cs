@@ -48,6 +48,13 @@ namespace Yosh.Editor
 				Text = original.Text;
 				Type = original.Type;
 			}
+
+			public TemplateData(string text, SCRIPT_TYPE type)
+			{
+				Text = text;
+				Type = type;
+			}
+
 			public TemplateData(string fileName, string text)
 			{
 				FullName = fileName + ".txt";
@@ -73,6 +80,7 @@ namespace Yosh.Editor
 		#region const
 
 		private const string COMMAND_PATH = "Tool/ScriptTemplateEditor";
+		private const string ASSETS = "Assets/";
 		private const string TEMPLATE_PATH = "/Resources/ScriptTemplates/";
 		private const int FOTTER_HEIGHT = 30;
 		private const string TMP_FOCUS = "focus";
@@ -134,10 +142,29 @@ namespace Yosh.Editor
 
 		#region MenuItem
 
-		[MenuItem(COMMAND_PATH)]
+		/// <summary>
+		/// 編集ウィンドウを開く
+		/// </summary>
+		[MenuItem(COMMAND_PATH + "Open")]
 		static void OpenWindow()
 		{
 			GetWindow<ScriptTemplateEditor>("ScriptTemplateEditor");
+		}
+
+		/// <summary>
+		/// ProjectViewで選択したファイルの内容を引用して編集ウィンドウを開く
+		/// </summary>
+		[MenuItem(ASSETS + "AddToTemplate",false,1)]
+		static void OpenfromSelectionFile()
+		{
+			var obj = Selection.activeObject;
+			SCRIPT_TYPE type = SCRIPT_TYPE.Csharp;
+			bool isAvailable = CheckFileType(obj, ref type);
+
+			if (!isAvailable) return;
+
+			var window = GetWindow<ScriptTemplateEditor>("ScriptTemplateEditor");
+			window._tData = CreateDataFromFile(obj, type);
 		}
 
 		#endregion
@@ -269,7 +296,7 @@ namespace Yosh.Editor
 		/// ファイルを読み込む
 		/// </summary>
 		/// <param name="fileName"></param>
-		private string ReadFile(string fileName)
+		private static string ReadFile(string fileName)
 		{
 			using (var streamReader = new StreamReader(fileName, System.Text.Encoding.UTF8))
 				return streamReader.ReadToEnd();
@@ -302,6 +329,36 @@ namespace Yosh.Editor
 			Process.Start(startInfo);
 
 			EditorApplication.Exit(0);
+		}
+
+		/// <summary>
+		/// 選択されたファイルの型を判定します
+		/// </summary>
+		/// <returns></returns>
+		static private bool CheckFileType(object selectionFile, ref SCRIPT_TYPE type)
+		{
+			if (selectionFile as MonoScript) {
+				type = SCRIPT_TYPE.Csharp;
+				return true;
+			}
+
+			if (selectionFile as Shader) {
+				type = SCRIPT_TYPE.Shader;
+				return true;
+			}
+
+			if (selectionFile as ComputeShader) {
+				type = SCRIPT_TYPE.ComputeShader;
+				return true;
+			}
+			return false;
+		}
+
+		static private TemplateData CreateDataFromFile(UnityEngine.Object obj, SCRIPT_TYPE type)
+		{
+			var path = AssetDatabase.GetAssetPath(obj);
+			var text = ReadFile(path);
+			return new TemplateData(text, type);
 		}
 
 		#endregion

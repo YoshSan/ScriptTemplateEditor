@@ -167,6 +167,17 @@ namespace Yosh.Editor
 			window._tData = CreateDataFromFile(obj, type);
 		}
 
+		/// <summary>
+		/// ProjectViewで選択したファイルの内容を引用して編集ウィンドウを開く
+		/// </summary>
+		[MenuItem(ASSETS + "AddToTemplate", true, 1)]
+		static bool OpenfromSelectionFileValidate()
+		{
+			var obj = Selection.activeObject;
+			SCRIPT_TYPE type = SCRIPT_TYPE.Csharp;
+			return CheckFileType(obj, ref type);
+		}
+
 		#endregion
 
 		#region function
@@ -373,7 +384,7 @@ namespace Yosh.Editor
 			//生成ボタン
 			if (!_isAdministrator)
 				EditorGUILayout.HelpBox("テンプレートの作成には管理者権限が必要です。\nUnityEditorを管理者として実行してください。", MessageType.Error);
-			using (new EditorGUI.DisabledGroupScope(HasError() || !_isAdministrator)) {
+			using (new EditorGUI.DisabledGroupScope(HasError() || !_isAdministrator || !CanCreate)) {
 				using (new ColorGroup(new Color32(218, 169, 112, 255)))
 					if (GUILayout.Button("作成"))
 						GenerateTemplate();

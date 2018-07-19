@@ -18,7 +18,8 @@ namespace Yosh.Editor
 		{
 			Csharp,
 			Shader,
-			ComputeShader
+			ComputeShader,
+			Custom
 		}
 
 		private class TemplateData
@@ -36,6 +37,8 @@ namespace Yosh.Editor
 			public string Text = "";
 			//生成するファイルの種類
 			public SCRIPT_TYPE Type = SCRIPT_TYPE.Csharp;
+
+			public string Extension = "";
 
 			public TemplateData() { }
 			public TemplateData(TemplateData original)
@@ -131,8 +134,8 @@ namespace Yosh.Editor
 				sb.Append(_tData.MenuTitle);
 				sb.AppendFormat("-{0}", _tData.FileName);
 
-				if (!_tData.FileName.Contains(TypeToString(_tData.Type)))
-					sb.Append(TypeToString(_tData.Type));
+				if (!_tData.FileName.Contains(TypeToString(_tData.Type, _tData.Extension)))
+					sb.Append(TypeToString(_tData.Type, _tData.Extension));
 				sb.Append(".txt");
 				return sb.ToString();
 
@@ -194,7 +197,7 @@ namespace Yosh.Editor
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static string TypeToString(SCRIPT_TYPE type)
+		public static string TypeToString(SCRIPT_TYPE type, string extensions)
 		{
 			switch (type) {
 			case SCRIPT_TYPE.Csharp:
@@ -203,6 +206,8 @@ namespace Yosh.Editor
 				return ".shader";
 			case SCRIPT_TYPE.ComputeShader:
 				return ".compute";
+			case SCRIPT_TYPE.Custom:
+				return extensions;
 			default:
 				return "";
 			}
@@ -348,20 +353,30 @@ namespace Yosh.Editor
 		/// <returns></returns>
 		static private bool CheckFileType(object selectionFile, ref SCRIPT_TYPE type)
 		{
-			if (selectionFile as MonoScript) {
+            // SCRIPT_TYPE.CSharp
+            if (selectionFile as MonoScript) {
 				type = SCRIPT_TYPE.Csharp;
 				return true;
 			}
 
-			if (selectionFile as Shader) {
+            // SCRIPT_TYPE.Shader
+            if (selectionFile as Shader) {
 				type = SCRIPT_TYPE.Shader;
 				return true;
 			}
 
-			if (selectionFile as ComputeShader) {
+            // SCRIPT_TYPE.ComputeShader
+            if (selectionFile as ComputeShader) {
 				type = SCRIPT_TYPE.ComputeShader;
 				return true;
 			}
+
+            // SCRIPT_TYPE.Custom
+            if(selectionFile as TextAsset)
+			{
+				return true;
+			}
+
 			return false;
 		}
 
@@ -418,8 +433,12 @@ namespace Yosh.Editor
 		/// </summary>
 		private void DrawSettingPanel()
 		{
-			using (new ContentsGroup(GUI.backgroundColor)) {
+            using (new ContentsGroup( EditorGUIUtility.isProSkin ? Color.grey : GUI.backgroundColor)) {
 				_tData.Type = (SCRIPT_TYPE) EditorGUILayout.EnumPopup("ファイル種類", _tData.Type);
+				if(_tData.Type == SCRIPT_TYPE.Custom)
+				{
+                    _tData.Extension = EditorGUILayout.TextField("生成ファイルの拡張子", _tData.Extension);
+				}
 				_tData.FileName = EditorGUILayout.TextField("テンプレートファイル名", _tData.FileName);
 				_tData.MenuTitle = EditorGUILayout.TextField("メニュー表示名", _tData.MenuTitle);
 				_tData.Priority = EditorGUILayout.IntField("表示優先度", _tData.Priority);
